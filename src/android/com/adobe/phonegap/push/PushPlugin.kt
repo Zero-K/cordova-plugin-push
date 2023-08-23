@@ -94,7 +94,7 @@ class PushPlugin : CordovaPlugin() {
 
           while (it.hasNext()) {
             val key = it.next()
-            val value = extras[key]
+            val value = getValueFromBundle(extras, key)
 
             Log.d(TAG, "Extras Iteration: key=$key")
 
@@ -148,7 +148,7 @@ class PushPlugin : CordovaPlugin() {
 
         return null
       }
-
+      
       extras?.let {
         val noCache = it.getString(PushConstants.NO_CACHE)
 
@@ -161,7 +161,16 @@ class PushPlugin : CordovaPlugin() {
       }
     }
 
-    /**
+    private fun getValueFromBundle(bundle: Bundle?, key: String):Any? {
+      return when {
+        bundle == null -> { null }
+        bundle.getString(key) != null -> { bundle.getString(key) }
+        bundle.getBoolean(key) != null -> { bundle.getBoolean(key) }
+        else -> { null }
+      }
+    }
+
+      /**
      * Retrieves the badge count from SharedPreferences
      *
      * @param context

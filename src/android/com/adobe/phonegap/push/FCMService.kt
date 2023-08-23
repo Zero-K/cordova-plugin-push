@@ -166,7 +166,8 @@ class FCMService : FirebaseMessagingService() {
     /*
      * Change a values key in the extras bundle
      */
-    var value = extras[oldKey]
+
+    var value = getValueFromBundle(extras, oldKey)
     if (value != null) {
       when (value) {
         is String -> {
@@ -313,7 +314,7 @@ class FCMService : FirebaseMessagingService() {
         key == PushConstants.MESSAGE ||
         key == messageKey
       ) {
-        val json = extras[key]
+        val json = getValueFromBundle(extras,key)
 
         // Make sure data is in json object string format
         if (json is String && json.startsWith("{")) {
@@ -624,7 +625,7 @@ class FCMService : FirebaseMessagingService() {
         NotificationCompat.Builder(context, channelID)
       }
     } else {
-      return NotificationCompat.Builder(context)
+      return NotificationCompat.Builder(context, PushConstants.DEFAULT_CHANNEL_ID)
     }
   }
 
@@ -1156,6 +1157,15 @@ class FCMService : FirebaseMessagingService() {
     }
   }
 
+  private fun getValueFromBundle(bundle: Bundle?, key: String):Any? {
+    return when {
+      bundle == null -> { null }
+      bundle.getString(key) != null -> { bundle.getString(key) }
+      bundle.getBoolean(key) != null -> { bundle.getBoolean(key) }
+      else -> { null }
+    }
+  }
+
   private fun getBitmapFromURL(strURL: String?): Bitmap? {
     return try {
       val url = URL(strURL)
@@ -1187,7 +1197,8 @@ class FCMService : FirebaseMessagingService() {
   }
 
   private fun fromHtml(source: String?): Spanned? {
-    return if (source != null) Html.fromHtml(source) else null
+    //updated for a compatibility mode of 0 for Legacy
+    return if (source != null) Html.fromHtml(source, Html.FROM_HTML_MODE_LEGACY) else null
   }
 
   private fun isAvailableSender(from: String?): Boolean {
